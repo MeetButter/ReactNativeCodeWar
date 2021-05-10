@@ -5,6 +5,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  StyleSheet,
+  Dimensions,
 } from 'react-native';
 import RtcEngine, {
   RtcLocalView,
@@ -12,51 +14,36 @@ import RtcEngine, {
   VideoRenderMode,
 } from 'react-native-agora';
 
-import requestCameraAndAudioPermission from './components/Permission';
-import styles from './components/Style';
-
-interface Props {}
+import requestCameraAndAudioPermission from './utils/Permission';
+import HeartReaction from './components/HeartReaction';
 
 /**
- * @property peerIds Array for storing connected peers
- * @property appId
- * @property channelName Channel Name for the current session
- * @property joinSucceed State variable for storing success
- */
-interface State {
-  appId: string;
-  token: string;
-  channelName: string;
-  joinSucceed: boolean;
-  peerIds: number[];
-}
-
-/**
+ * TASK: Create a free AgoraIO Account
  * Use APP ID from your Agora project
  * @see https://docs.agora.io/en/Agora%20Platform/token#a-name--appidause-an-app-id-for-authentication
  */
-const AGORA_APP_ID = 'd119092f1efb4c06a84b32784b1f7153';
+const AGORA_APP_ID = 'yourAgoraAppId';
+
+/**
+ * TASK: Generate temporary token generated on Agora dashboard (valid for 24 hours)
+ * or create a lambda / firebase function for generating Token via API call (optional)
+ * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
+ */
+const TEMP_TOKEN_ID = 'tempTokenId';
 
 const App: FunctionComponent = () => {
   const AgoraEngine = useRef<RtcEngine>();
-
-  /**
-   * Generate temporary token generated on Agora dashboard (valid for 24 hours)
-   * or create a lambda / firebase function for generating Token via API call
-   * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
-   */
-  const [token] = useState<string>('006d119092f1efb4c06a84b32784b1f7153IADYE9305agRHAbgin4lTJFkDMfybHDFuq3d+i1+qbLCKpg7u+YAAAAAEADn5pQIfCSaYAEAAQB6JJpg');
-  const [channelName] = useState<string>('testRoom'); // Use this to generate token on Agora dashboard
+  const [token] = useState<string>(TEMP_TOKEN_ID);
+  const [channelName] = useState<string>('testChannel'); // Use this to generate token on Agora dashboard
   const [joinSucceed, setJoinSucceed] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
   const [peerIds, setPeerIds] = useState<number[]>([]);
-
   /**
-   * @name init
-   * @description Function to initialize the Rtc Engine, attach event listeners and actions
+   * TASK: Add redux and migrate heart states to redux
    */
+  const [hearts, setHearts] = useState<{ id: number }[]>([]);
+  const [heartsElements, setHeartsElements] = useState<JSX.Element[]>([]);
+
   const init = async () => {
-    // Request required permissions from Android
     if (Platform.OS === 'android') {
       requestCameraAndAudioPermission().then(() => {
         console.log('requested!');
@@ -76,36 +63,25 @@ const App: FunctionComponent = () => {
 
     AgoraEngine.current.addListener('UserJoined', (uid, elapsed) => {
       console.log('UserJoined', uid, elapsed);
-      // If new user
       if (peerIds.indexOf(uid) === -1) {
-        // Add peer ID to state array
         setPeerIds([...peerIds, uid]);
       }
     });
 
     AgoraEngine.current.addListener('UserOffline', (uid, reason) => {
       console.log('UserOffline', uid, reason);
-      // Remove peer ID from state array
       setPeerIds(peerIds.filter((id) => id !== uid));
     });
 
-    // If Local user joins RTC channel
     AgoraEngine.current.addListener(
       'JoinChannelSuccess',
       (channel, uid, elapsed) => {
         console.log('JoinChannelSuccess', channel, uid, elapsed);
-        // Set state variable to true
         setJoinSucceed(true);
-        setLoading(false);
       }
     );
-    setLoading(false);
   };
 
-  /**
-   * @name endCall
-   * @description Function to end the call
-   */
   const endCall = async () => {
     if (AgoraEngine.current) await AgoraEngine.current.leaveChannel();
     setPeerIds([]);
@@ -120,11 +96,26 @@ const App: FunctionComponent = () => {
   }, []);
 
   /**
-   * @name startCall
-   * @description Function to start the call
+   * TASK: Add redux middleware and handle this Side Effect in middleware
+   * Bonus: use Debounce for enhancing performance
    */
+  useEffect(() => {
+    if (hearts.length > 0) {
+      const heartElements = hearts.map((heart) => {
+        return (
+          <View style={styles.heartContainer} key={heart.id}>
+            <HeartReaction color="red" size={2} />
+          </View>
+        );
+      });
+      setHeartsElements(heartElements);
+      setTimeout(() => {
+        setHearts([]);
+      }, 1000);
+    }
+  }, [hearts]);
+
   const startCall = async () => {
-    // Join Channel using null token and channel name
     await AgoraEngine.current?.joinChannel(token, channelName, null, 0);
   };
 
@@ -136,6 +127,7 @@ const App: FunctionComponent = () => {
           channelId={channelName}
           renderMode={VideoRenderMode.Hidden}
         />
+        {heartsElements}
         {renderRemoteVideos()}
       </View>
     ) : null;
@@ -163,13 +155,18 @@ const App: FunctionComponent = () => {
     );
   };
 
-  if (loading) {
-    return null;
-  }
+  /**
+   * TASK: Dispatch side effect to middle for handling new heart added action
+   * Bonus: use Debounce for enhancing performance
+   */
+  const addHeart = () => {
+    setHearts([...hearts, { id: Math.round(Math.random() * 1000) }]);
+  };
 
   return (
     <View style={styles.max}>
       <View style={styles.max}>
+        {renderVideos()}
         <View style={styles.buttonHolder}>
           <TouchableOpacity onPress={startCall} style={styles.button}>
             <Text style={styles.buttonText}> Start Call </Text>
@@ -177,11 +174,67 @@ const App: FunctionComponent = () => {
           <TouchableOpacity onPress={endCall} style={styles.button}>
             <Text style={styles.buttonText}> End Call </Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={addHeart} style={styles.button}>
+            <Text style={styles.buttonText}> Like </Text>
+          </TouchableOpacity>
         </View>
-        {renderVideos()}
       </View>
     </View>
   );
 };
 
 export default App;
+
+const dimensions = {
+  width: Dimensions.get('window').width,
+  height: Dimensions.get('window').height,
+};
+
+const styles = StyleSheet.create({
+  max: {
+    flex: 1,
+  },
+  buttonHolder: {
+    height: 100,
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  button: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#0093E9',
+    borderRadius: 25,
+  },
+  buttonText: {
+    color: '#fff',
+  },
+  fullView: {
+    width: dimensions.width,
+    height: dimensions.height - 100,
+  },
+  remoteContainer: {
+    width: '100%',
+    height: 150,
+    position: 'absolute',
+    top: 5,
+  },
+  remote: {
+    width: 150,
+    height: 150,
+    marginHorizontal: 2.5,
+  },
+  noUserText: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    color: '#0093E9',
+  },
+  heartContainer: {
+    width: 10,
+    height: 10,
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+  },
+});
