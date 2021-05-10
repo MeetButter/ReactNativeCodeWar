@@ -30,11 +30,12 @@ const AGORA_APP_ID = 'yourAgoraAppId';
  * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
  */
 const TEMP_TOKEN_ID = 'tempTokenId';
+const CHANNEL_NAME = 'testChannel';
 
 const App: FunctionComponent = () => {
   const AgoraEngine = useRef<RtcEngine>();
   const [token] = useState<string>(TEMP_TOKEN_ID);
-  const [channelName] = useState<string>('testChannel'); // Use this to generate token on Agora dashboard
+  const [channelName] = useState<string>(CHANNEL_NAME); // Use this to generate token on Agora dashboard
   const [joinSucceed, setJoinSucceed] = useState<boolean>(false);
   const [peerIds, setPeerIds] = useState<number[]>([]);
   /**
