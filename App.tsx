@@ -97,7 +97,7 @@ const App: FunctionComponent = () => {
 
   /**
    * TASK: Add redux middleware and handle this Side Effect in middleware
-   * Bonus: use Debounce for enhancing performance
+   * Bonus: use Debounce on showing the heart for enhanced performance
    */
   useEffect(() => {
     if (hearts.length > 0) {
@@ -156,8 +156,7 @@ const App: FunctionComponent = () => {
   };
 
   /**
-   * TASK: Dispatch side effect to middle for handling new heart added action
-   * Bonus: use Debounce for enhancing performance
+   * TASK: Dispatch side effect to middleware for handling new heart added action
    */
   const addHeart = () => {
     setHearts([...hearts, { id: Math.round(Math.random() * 1000) }]);
