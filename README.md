@@ -16,9 +16,8 @@ This minimal App has the basic functionality to start a video conference call th
 
 * First, follow instructions below to spin up the App with your own Agora account. (This task is to validate your experience with integrating 3rd party vendor)
 * Then, integrate Redux and any Redux Middleware (thunk or saga) into this App for handling the side effects of `like` actions. (This task is to verify your knowledge with Redux and its middleware)
-* You are free to improve the code logics and performance of the `like` functionality. For exmaple, debouncing the rendering of hearts ♥️ when `like` button is being pressed continuously. 
+* You are free to improve the code logics and performance of the `like` functionality. For example, debouncing the rendering of hearts ♥️ when `like` button is being pressed continuously. 
 * See [`./App.tsx`](https://github.com/MeetButter/ReactNativeCodeWar/blob/master/App.tsx) for comments that mentioning the tasks.
-
 * Create a Pull Request into this code repo and provide a recorded demo for us to evaluate your work. Otherwise a live demo of your work is expected later based on schedule when neccessary.
 
 ## Spinning up this App
