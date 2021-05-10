@@ -19,6 +19,7 @@ This minimal App has the basic functionality to start a video conference call th
 * You are free to improve the code logics, error handling and performance of the `like` functionality in the Redux Middleware. For example, debouncing the rendering of hearts ♥️ when `like` button is being pressed continuously. 
 * See [`./App.tsx`](https://github.com/MeetButter/ReactNativeCodeWar/blob/master/App.tsx) for comments that mentioning the tasks.
 * Create a Pull Request into this code repo and provide a recorded demo for us to evaluate your work. Otherwise a live demo of your work is expected later based on schedule when neccessary.
+* You are advised to complete the tasks within 48 hours once this is assigned. Get back to us when your PR is ready :)
 
 ## Spinning up this App
 ### Generate an App ID
