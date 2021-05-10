@@ -11,5 +11,6 @@ module.exports = {
         useTabs: false,
       },
     ],
+    'react-hooks/exhaustive-deps': 'off',
   },
 };

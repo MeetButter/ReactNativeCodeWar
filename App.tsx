@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { FunctionComponent, useEffect, useState, useRef } from 'react';
 import {
   Platform,
   ScrollView,
@@ -31,136 +31,117 @@ interface State {
   peerIds: number[];
 }
 
-export default class App extends Component<Props, State> {
-  _engine?: RtcEngine;
+/**
+ * Use APP ID from your Agora project
+ * @see https://docs.agora.io/en/Agora%20Platform/token#a-name--appidause-an-app-id-for-authentication
+ */
+const AGORA_APP_ID = 'd119092f1efb4c06a84b32784b1f7153';
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      appId: YourAppId,
-      token: YourToken,
-      channelName: 'channel-x',
-      joinSucceed: false,
-      peerIds: [],
-    };
-    if (Platform.OS === 'android') {
-      // Request required permissions from Android
-      requestCameraAndAudioPermission().then(() => {
-        console.log('requested!');
-      });
-    }
-  }
+const App: FunctionComponent = () => {
+  const AgoraEngine = useRef<RtcEngine>();
 
-  componentDidMount() {
-    this.init();
-  }
+  /**
+   * Generate temporary token generated on Agora dashboard (valid for 24 hours)
+   * or create a lambda / firebase function for generating Token via API call
+   * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
+   */
+  const [token] = useState<string>('006d119092f1efb4c06a84b32784b1f7153IADYE9305agRHAbgin4lTJFkDMfybHDFuq3d+i1+qbLCKpg7u+YAAAAAEADn5pQIfCSaYAEAAQB6JJpg');
+  const [channelName] = useState<string>('testRoom'); // Use this to generate token on Agora dashboard
+  const [joinSucceed, setJoinSucceed] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [peerIds, setPeerIds] = useState<number[]>([]);
 
   /**
    * @name init
    * @description Function to initialize the Rtc Engine, attach event listeners and actions
    */
-  init = async () => {
-    const { appId } = this.state;
-    this._engine = await RtcEngine.create(appId);
-    await this._engine.enableVideo();
+  const init = async () => {
+    // Request required permissions from Android
+    if (Platform.OS === 'android') {
+      requestCameraAndAudioPermission().then(() => {
+        console.log('requested!');
+      });
+    }
 
-    this._engine.addListener('Warning', (warn) => {
+    AgoraEngine.current = await RtcEngine.create(AGORA_APP_ID);
+    await AgoraEngine.current.enableVideo();
+
+    AgoraEngine.current.addListener('Warning', (warn) => {
       console.log('Warning', warn);
     });
 
-    this._engine.addListener('Error', (err) => {
+    AgoraEngine.current.addListener('Error', (err) => {
       console.log('Error', err);
     });
 
-    this._engine.addListener('UserJoined', (uid, elapsed) => {
+    AgoraEngine.current.addListener('UserJoined', (uid, elapsed) => {
       console.log('UserJoined', uid, elapsed);
-      // Get current peer IDs
-      const { peerIds } = this.state;
       // If new user
       if (peerIds.indexOf(uid) === -1) {
-        this.setState({
-          // Add peer ID to state array
-          peerIds: [...peerIds, uid],
-        });
+        // Add peer ID to state array
+        setPeerIds([...peerIds, uid]);
       }
     });
 
-    this._engine.addListener('UserOffline', (uid, reason) => {
+    AgoraEngine.current.addListener('UserOffline', (uid, reason) => {
       console.log('UserOffline', uid, reason);
-      const { peerIds } = this.state;
-      this.setState({
-        // Remove peer ID from state array
-        peerIds: peerIds.filter((id) => id !== uid),
-      });
+      // Remove peer ID from state array
+      setPeerIds(peerIds.filter((id) => id !== uid));
     });
 
     // If Local user joins RTC channel
-    this._engine.addListener('JoinChannelSuccess', (channel, uid, elapsed) => {
-      console.log('JoinChannelSuccess', channel, uid, elapsed);
-      // Set state variable to true
-      this.setState({
-        joinSucceed: true,
-      });
-    });
-  };
-
-  /**
-   * @name startCall
-   * @description Function to start the call
-   */
-  startCall = async () => {
-    // Join Channel using null token and channel name
-    await this._engine?.joinChannel(
-      this.state.token,
-      this.state.channelName,
-      null,
-      0
+    AgoraEngine.current.addListener(
+      'JoinChannelSuccess',
+      (channel, uid, elapsed) => {
+        console.log('JoinChannelSuccess', channel, uid, elapsed);
+        // Set state variable to true
+        setJoinSucceed(true);
+        setLoading(false);
+      }
     );
+    setLoading(false);
   };
 
   /**
    * @name endCall
    * @description Function to end the call
    */
-  endCall = async () => {
-    await this._engine?.leaveChannel();
-    this.setState({ peerIds: [], joinSucceed: false });
+  const endCall = async () => {
+    if (AgoraEngine.current) await AgoraEngine.current.leaveChannel();
+    setPeerIds([]);
+    setJoinSucceed(false);
   };
 
-  render() {
-    return (
-      <View style={styles.max}>
-        <View style={styles.max}>
-          <View style={styles.buttonHolder}>
-            <TouchableOpacity onPress={this.startCall} style={styles.button}>
-              <Text style={styles.buttonText}> Start Call </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={this.endCall} style={styles.button}>
-              <Text style={styles.buttonText}> End Call </Text>
-            </TouchableOpacity>
-          </View>
-          {this._renderVideos()}
-        </View>
-      </View>
-    );
-  }
+  useEffect(() => {
+    init();
+    return () => {
+      endCall();
+    };
+  }, []);
 
-  _renderVideos = () => {
-    const { joinSucceed } = this.state;
+  /**
+   * @name startCall
+   * @description Function to start the call
+   */
+  const startCall = async () => {
+    // Join Channel using null token and channel name
+    await AgoraEngine.current?.joinChannel(token, channelName, null, 0);
+  };
+
+  const renderVideos = () => {
     return joinSucceed ? (
       <View style={styles.fullView}>
         <RtcLocalView.SurfaceView
           style={styles.max}
-          channelId={this.state.channelName}
+          channelId={channelName}
           renderMode={VideoRenderMode.Hidden}
         />
-        {this._renderRemoteVideos()}
+        {renderRemoteVideos()}
       </View>
     ) : null;
   };
 
-  _renderRemoteVideos = () => {
-    const { peerIds } = this.state;
+  const renderRemoteVideos = () => {
     return (
       <ScrollView
         style={styles.remoteContainer}
@@ -172,7 +153,7 @@ export default class App extends Component<Props, State> {
             <RtcRemoteView.SurfaceView
               style={styles.remote}
               uid={value}
-              channelId={this.state.channelName}
+              channelId={channelName}
               renderMode={VideoRenderMode.Hidden}
               zOrderMediaOverlay={true}
             />
@@ -181,4 +162,26 @@ export default class App extends Component<Props, State> {
       </ScrollView>
     );
   };
-}
+
+  if (loading) {
+    return null;
+  }
+
+  return (
+    <View style={styles.max}>
+      <View style={styles.max}>
+        <View style={styles.buttonHolder}>
+          <TouchableOpacity onPress={startCall} style={styles.button}>
+            <Text style={styles.buttonText}> Start Call </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={endCall} style={styles.button}>
+            <Text style={styles.buttonText}> End Call </Text>
+          </TouchableOpacity>
+        </View>
+        {renderVideos()}
+      </View>
+    </View>
+  );
+};
+
+export default App;
