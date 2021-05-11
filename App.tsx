@@ -112,7 +112,7 @@ const App: FunctionComponent = () => {
       setHeartsElements(heartElements);
       setTimeout(() => {
         setHearts([]);
-      }, 1000);
+      }, 2000);
     }
   }, [hearts]);
 
