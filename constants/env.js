@@ -1,0 +1,4 @@
+export const AGORA_APP_ID = '86f6e8f4174b4921bf22b5c3ba1345e7';
+export const TEMP_TOKEN_ID =
+  '00686f6e8f4174b4921bf22b5c3ba1345e7IADmodFCO/8ffeIUJIy+idiLD7ru7sc4I/UrMdsCtk7MwuZf92cAAAAAEAD4YHXYhrGcYAEAAQCDsZxg';
+export const CHANNEL_NAME = '__BUTT__';

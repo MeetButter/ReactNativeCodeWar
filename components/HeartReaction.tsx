@@ -21,29 +21,40 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
 
   const anim = useRef(new Animated.Value(0));
 
+  const xVal = anim.current.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 250],
+  });
+
+  const yVal = anim.current.interpolate({
+    inputRange: [20, 100],
+    outputRange: [20, 350],
+  });
+
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(anim.current, {
-          toValue: 2,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim.current, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-    setTimeout(() => {
-      anim.current.stopAnimation();
-    }, 1000);
+    Animated.sequence([
+      Animated.timing(anim.current, {
+        toValue: 2,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(anim.current, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Animated.View style={{ transform: [{ scale: anim.current }] }}>
+      <Animated.View
+        style={{
+          transform: [
+            { scale: anim.current, translateY: yVal, translateX: xVal },
+          ],
+        }}
+      >
         <View
           style={[
             {

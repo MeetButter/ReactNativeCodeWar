@@ -1,3 +1,4 @@
+import { AGORA_APP_ID, CHANNEL_NAME, TEMP_TOKEN_ID } from '@/constants/env';
 import React, { FunctionComponent, useEffect, useState, useRef } from 'react';
 import {
   Platform,
@@ -18,19 +19,10 @@ import requestCameraAndAudioPermission from './utils/Permission';
 import HeartReaction from './components/HeartReaction';
 
 /**
- * TASK: Create a free AgoraIO Account
- * Use APP ID from your Agora project
- * @see https://docs.agora.io/en/Agora%20Platform/token#a-name--appidause-an-app-id-for-authentication
- */
-const AGORA_APP_ID = 'yourAgoraAppId';
-
-/**
  * TASK: Generate temporary token generated on Agora dashboard (valid for 24 hours)
  * or create a lambda / firebase function for generating Token via API call (optional)
  * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
  */
-const TEMP_TOKEN_ID = 'tempTokenId';
-const CHANNEL_NAME = 'testChannel';
 
 const App: FunctionComponent = () => {
   const AgoraEngine = useRef<RtcEngine>();
@@ -112,7 +104,7 @@ const App: FunctionComponent = () => {
       setHeartsElements(heartElements);
       setTimeout(() => {
         setHearts([]);
-      }, 1000);
+      }, 2000);
     }
   }, [hearts]);
 
