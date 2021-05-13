@@ -1,9 +1,15 @@
-/**
- * @format
- */
-
+import React from 'react';
+import { RecoilRoot } from 'recoil';
 import { AppRegistry } from 'react-native';
 import App from './App';
-import { name as appName } from './app.json';
+import { name } from './app.json';
 
-AppRegistry.registerComponent(appName, () => App);
+function root() {
+  return () => (
+    <RecoilRoot>
+      <App />
+    </RecoilRoot>
+  );
+}
+
+AppRegistry.registerComponent(name, root);

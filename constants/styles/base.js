@@ -1,9 +1,5 @@
-import { Dimensions, StyleSheet } from 'react-native';
-
-const dimensions = {
-  width: Dimensions.get('window').width,
-  height: Dimensions.get('window').height,
-};
+import dimensions from '@/constants/dimensions';
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   max: {
@@ -46,8 +42,6 @@ const styles = StyleSheet.create({
     color: '#0093E9',
   },
   heartContainer: {
-    width: 10,
-    height: 10,
     position: 'absolute',
     bottom: 24,
     right: 24,

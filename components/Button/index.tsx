@@ -3,7 +3,7 @@ import styles from '@/constants/styles/base';
 import { Text, TouchableOpacity } from 'react-native';
 
 export type Props = {
-  onPress: () => void;
+  onPress?: () => void;
   /** Text to render */
   children: Text | React.ReactNode;
 };
