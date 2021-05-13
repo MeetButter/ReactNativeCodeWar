@@ -6,9 +6,11 @@ export type Props = {
   onPress?: () => void;
   /** Text to render */
   children: Text | React.ReactNode;
+  hidden?: boolean;
 };
 
-export default function Button({ onPress, children }) {
+export default function Button({ onPress, children, hidden }) {
+  if (hidden) return null;
   return (
     <TouchableOpacity onPress={onPress} style={styles.button}>
       <Text style={styles.buttonText}>{children}</Text>

@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   heartContainer: {
     position: 'absolute',
     bottom: 24,
-    right: 24,
+    right: 40,
   },
 });
 

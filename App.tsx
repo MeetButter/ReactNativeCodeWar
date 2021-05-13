@@ -11,6 +11,7 @@ import { useRecoilState } from 'recoil';
 import heartItems from '@/components/HeartReactions/_state/heartItems';
 import addRandomHeart from '@/components/HeartReactions/_actions/addRandomHeart';
 import getUserToken, { Token } from './utils/getUserToken';
+import LikeButton from '@/components/LikeButton';
 
 const App: React.FC = () => {
   const [, setHeartItems] = useRecoilState(heartItems);
@@ -66,9 +67,13 @@ const App: React.FC = () => {
           <HeartReactions />
         </RemoteVideoPreview>
         <View style={styles.buttonHolder}>
-          <Button onPress={startCall}>Start Call</Button>
-          <Button onPress={endCall}>End Call</Button>
-          <Button onPress={addHeartReaction}>Like</Button>
+          <Button hidden={joinSucceed} onPress={startCall}>
+            Start Call
+          </Button>
+          <Button hidden={!joinSucceed} onPress={endCall}>
+            End Call
+          </Button>
+          <LikeButton hidden={!joinSucceed} onPress={addHeartReaction} />
         </View>
       </View>
     </View>

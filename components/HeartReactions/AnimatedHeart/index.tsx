@@ -1,31 +1,20 @@
 import styles from '@/constants/styles/base';
-import React, { FunctionComponent, useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, Animated } from 'react-native';
 import dimensions from '@/constants/dimensions';
-interface HeartReactionProps {
+import HeartIcon from '@/components/HeartIcon';
+interface Props {
   size: number;
   removeHeart: () => void;
 }
 
-const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
+const AnimatedHeart: React.FC<Props> = (props) => {
   const { size, removeHeart } = props;
-  const heartPiceStyle = {
-    width: 6 * size,
-    height: 9 * size,
-    bottom: 0,
-    borderTopLeftRadius: 3 * size,
-    borderTopRightRadius: 3 * size,
-    backgroundColor: 'red',
-  };
-  const anim = useRef(new Animated.Value(0));
 
+  const anim = useRef(new Animated.Value(0));
   const xOutput = useMemo(() => {
     const initXVal = Math.random() * 50;
     return [-initXVal, initXVal + Math.random() * -200];
-  }, []);
-
-  const yOutput = useMemo(() => {
-    return [-10, 200 + dimensions.height * 0.222];
   }, []);
 
   const xVal = anim.current.interpolate({
@@ -34,7 +23,7 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
   });
   const yVal = anim.current.interpolate({
     inputRange: [30, 100],
-    outputRange: yOutput,
+    outputRange: [-10, 200 + dimensions.height * 0.222],
   });
   const scaleVal = anim.current.interpolate({
     inputRange: [0, 30, 100],
@@ -71,33 +60,10 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
           transform: [{ scale: scaleVal, translateY: yVal, translateX: xVal }],
         }}
       >
-        <View
-          style={{
-            width: 10 * size,
-            height: 10 * size,
-            backgroundColor: 'transparent',
-          }}
-        >
-          <View
-            style={{
-              ...heartPiceStyle,
-              position: 'absolute',
-              transform: [{ rotate: '-45deg' }],
-              left: size,
-            }}
-          />
-          <View
-            style={{
-              ...heartPiceStyle,
-              position: 'absolute',
-              transform: [{ rotate: '45deg' }],
-              right: size,
-            }}
-          />
-        </View>
+        <HeartIcon size={size} />
       </Animated.View>
     </View>
   );
 };
 
-export default HeartReaction;
+export default AnimatedHeart;
