@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { PermissionsAndroid } from 'react-native';
 
 /**

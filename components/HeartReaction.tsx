@@ -1,13 +1,15 @@
+/* eslint-disable prettier/prettier */
 import React, { FunctionComponent, useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 
 interface HeartReactionProps {
   color: string;
   size: number;
+  clicked: boolean
 }
 
 const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
-  const { color, size } = props;
+  const { color, size,clicked } = props;
 
   const heartPiece = {
     width: 6 * size,
@@ -32,16 +34,35 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
   });
 
   useEffect(() => {
+
     Animated.sequence([
       Animated.timing(anim.current, {
-        toValue: 2,
-        duration: 1000,
+        toValue: 0,
+        duration: 0,
         useNativeDriver: true,
       }),
       Animated.timing(anim.current, {
-        toValue: 0,
-        duration: 1000,
+        toValue: 1,
+        duration: 300,
         useNativeDriver: true,
+      }),
+      Animated.timing(anim.current, {
+        toValue: 2,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      
+      Animated.timing(anim.current, {
+        toValue: 1,
+        duration: 10,
+        useNativeDriver: true,
+
+      }),
+      Animated.timing(anim.current, {
+        toValue: 0,
+        duration: 5,
+        useNativeDriver: true,
+
       }),
     ]).start();
   }, []);
@@ -49,15 +70,11 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
   return (
     <View style={styles.container}>
       <Animated.View
-        style={{
-          transform: [
-            { scale: anim.current, translateY: yVal, translateX: xVal },
-          ],
-        }}
-      >
+        style={{transform: [{ scale: anim.current }, {translateY: yVal}, {translateX: xVal}]}}>
         <View
           style={[
             {
+              opacity: clicked ? 1: 0,
               width: 10 * size,
               height: 10 * size,
               backgroundColor: 'transparent',
@@ -68,19 +85,13 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
             style={[
               {
                 transform: [{ rotate: '-45deg' }],
-                left: 0.9 * size,
-              },
-              heartPiece,
-            ]}
+                left: 0.8 * size,
+              }, heartPiece,]}
           />
-          <View
-            style={[
-              {
+          <View style={[{
+           
                 transform: [{ rotate: '45deg' }],
-                right: 0.9 * size,
-              },
-              heartPiece,
-            ]}
+                right: 0.9 * size,},heartPiece,]}
           />
         </View>
       </Animated.View>
