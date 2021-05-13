@@ -1,4 +1,4 @@
-import { CHANNEL_NAME, TEMP_TOKEN_ID } from '@/constants/env';
+import { CHANNEL_NAME } from '@/constants/env';
 import styles from '@/constants/styles/base';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View } from 'react-native';
@@ -10,15 +10,11 @@ import Button from '@/components/Button';
 import { useRecoilState } from 'recoil';
 import heartItems from '@/components/HeartReactions/_state/heartItems';
 import addRandomHeart from '@/components/HeartReactions/_actions/addRandomHeart';
+import getUserToken, { Token } from './utils/getUserToken';
 
-/**
- * TASK: Generate temporary token generated on Agora dashboard (valid for 24 hours)
- * or create a lambda / firebase function for generating Token via API call (optional)
- * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
- */
 const App: React.FC = () => {
-  const [, setHeartsCount] = useRecoilState(heartItems);
-  const [token] = useState<string>(TEMP_TOKEN_ID);
+  const [, setHeartItems] = useRecoilState(heartItems);
+  const [user, setUser] = useState<Token>({ token: '', uid: 0 });
   const [channelName] = useState<string>(CHANNEL_NAME); // Use this to generate token on Agora dashboard
   const [joinSucceed, setJoinSucceed] = useState<boolean>(false);
   const [peerIds, setPeerIds] = useState<number[]>([]);
@@ -31,13 +27,18 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    getAgoraEngine({
-      getPeers: () => peerIds,
-      onPeer: setPeerIds,
-      onJoin: setJoinSucceed,
-    }).then((newEngine) => {
-      AgoraEngine.current = newEngine;
-    });
+    async function init() {
+      setUser(await getUserToken());
+      const client = await getAgoraEngine({
+        getPeers: () => peerIds,
+        onPeer: setPeerIds,
+        onJoin: setJoinSucceed,
+      });
+      AgoraEngine.current = client;
+    }
+    // Setup client and get user info
+    init();
+
     return () => {
       endCall();
     };
@@ -45,13 +46,13 @@ const App: React.FC = () => {
 
   const startCall = useCallback(
     function startCall() {
-      AgoraEngine.current?.joinChannel(token, channelName, null, 0);
+      AgoraEngine.current?.joinChannel(user.token, channelName, null, user.uid);
     },
-    [token, channelName]
+    [user, channelName]
   );
 
   function addHeartReaction() {
-    setHeartsCount(addRandomHeart());
+    setHeartItems(addRandomHeart());
   }
 
   return (

@@ -3,8 +3,8 @@ import { Hearts } from '../_state/heartItems';
 
 export const addRandomHeart = () => {
   return (prev: Hearts) => {
-    const { length } = prev;
-    if (length > 9) return prev;
+    // Only allow three "random" hearts
+    if (prev.length > 9) return prev;
     const heart = {
       id: nanoid(25),
     };
