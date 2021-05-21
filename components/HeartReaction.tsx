@@ -19,6 +19,7 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
     backgroundColor: color,
   };
 
+
   const anim = useRef(new Animated.Value(0));
 
   const xVal = anim.current.interpolate({
@@ -30,19 +31,23 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
     inputRange: [20, 100],
     outputRange: [20, 350],
   });
+  const opacityVal = anim.current.interpolate({
+    inputRange: [0, 2],
+    outputRange: [1, 0],
+  });
 
   useEffect(() => {
     Animated.sequence([
       Animated.timing(anim.current, {
         toValue: 2,
-        duration: 1000,
+        duration: 1500,
         useNativeDriver: true,
       }),
-      Animated.timing(anim.current, {
-        toValue: 0,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
+      // Animated.timing(anim.current, {
+      //   toValue: 0,
+      //   duration: 1000,
+      //   useNativeDriver: true,
+      // }),
     ]).start();
   }, []);
 
@@ -51,8 +56,12 @@ const HeartReaction: FunctionComponent<HeartReactionProps> = (props) => {
       <Animated.View
         style={{
           transform: [
-            { scale: anim.current, translateY: yVal, translateX: xVal },
+            { scale: anim.current },
+            { translateY: yVal },
+            { translateX: xVal },
           ],
+          right: 30,
+          opacity: opacityVal,
         }}
       >
         <View
