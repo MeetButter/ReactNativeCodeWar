@@ -13,11 +13,12 @@ import RtcEngine, {
   RtcRemoteView,
   VideoRenderMode,
 } from 'react-native-agora';
-
 import requestCameraAndAudioPermission from './utils/Permission';
 import HeartReaction from './components/HeartReaction';
 import { useDispatch, useSelector } from 'react-redux';
 import { addHeart } from './store/action';
+import { RootState } from './store/index';
+
 
 /**
  * TASK: Create a free AgoraIO Account
@@ -47,7 +48,7 @@ const App: FunctionComponent = () => {
   // const [hearts, setHearts] = useState<{ id: number }[]>([]);
   // const [heartsElements, setHeartsElements] = useState<JSX.Element[]>([]);
   const dispatch = useDispatch();
-  const { hearts }: any = useSelector((state) => state);
+  const { hearts } = useSelector((state: RootState) => state);
 
   const init = async () => {
     if (Platform.OS === 'android') {
