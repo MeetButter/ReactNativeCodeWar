@@ -16,20 +16,23 @@ import RtcEngine, {
 
 import requestCameraAndAudioPermission from './utils/Permission';
 import HeartReaction from './components/HeartReaction';
+import { useDispatch, useSelector } from 'react-redux';
+import { addHeart } from './store/action';
 
 /**
  * TASK: Create a free AgoraIO Account
  * Use APP ID from your Agora project
  * @see https://docs.agora.io/en/Agora%20Platform/token#a-name--appidause-an-app-id-for-authentication
  */
-const AGORA_APP_ID = 'yourAgoraAppId';
+const AGORA_APP_ID = '257374cb54ca41deb2608671b0988d99';
 
 /**
  * TASK: Generate temporary token generated on Agora dashboard (valid for 24 hours)
  * or create a lambda / firebase function for generating Token via API call (optional)
  * @see https://docs.agora.io/en/Agora%20Platform/token#3-generate-a-token
  */
-const TEMP_TOKEN_ID = 'tempTokenId';
+const TEMP_TOKEN_ID =
+  '006257374cb54ca41deb2608671b0988d99IABYKt47pVfFaa/H61DmU7TiCXUSCQ4gZYkICUiLAUuQh3ZXrgMAAAAAEAD4YHXYQJqnYAEAAQA+mqdg';
 const CHANNEL_NAME = 'testChannel';
 
 const App: FunctionComponent = () => {
@@ -41,8 +44,10 @@ const App: FunctionComponent = () => {
   /**
    * TASK: Add redux and migrate heart states to redux
    */
-  const [hearts, setHearts] = useState<{ id: number }[]>([]);
-  const [heartsElements, setHeartsElements] = useState<JSX.Element[]>([]);
+  // const [hearts, setHearts] = useState<{ id: number }[]>([]);
+  // const [heartsElements, setHeartsElements] = useState<JSX.Element[]>([]);
+  const dispatch = useDispatch();
+  const { hearts }: any = useSelector((state) => state);
 
   const init = async () => {
     if (Platform.OS === 'android') {
@@ -100,27 +105,27 @@ const App: FunctionComponent = () => {
    * TASK: Add redux middleware and handle this Side Effect in middleware
    * Bonus: use Debounce on showing the heart for enhanced performance
    */
-  useEffect(() => {
-    if (hearts.length > 0) {
-      const heartElements = hearts.map((heart) => {
-        return (
-          <View style={styles.heartContainer} key={heart.id}>
-            <HeartReaction color="red" size={2} />
-          </View>
-        );
-      });
-      setHeartsElements(heartElements);
-      setTimeout(() => {
-        setHearts([]);
-      }, 2000);
-    }
-  }, [hearts]);
+  // useEffect(() => {
+  //   if (hearts.length > 0) {
+  //     // setTimeout(() => {
+  //     //   setHearts([]);
+  //     // }, 2000);
+  //   }
+  // }, [hearts]);
 
   const startCall = async () => {
     await AgoraEngine.current?.joinChannel(token, channelName, null, 0);
   };
 
   const renderVideos = () => {
+    const heartElements = hearts.map((heart) => {
+      return (
+        <View style={styles.heartContainer} key={heart.id}>
+          <HeartReaction color="red" size={2} />
+        </View>
+      );
+    });
+
     return joinSucceed ? (
       <View style={styles.fullView}>
         <RtcLocalView.SurfaceView
@@ -128,7 +133,7 @@ const App: FunctionComponent = () => {
           channelId={channelName}
           renderMode={VideoRenderMode.Hidden}
         />
-        {heartsElements}
+        {heartElements}
         {renderRemoteVideos()}
       </View>
     ) : null;
@@ -159,8 +164,16 @@ const App: FunctionComponent = () => {
   /**
    * TASK: Dispatch side effect to middleware for handling new heart added action
    */
-  const addHeart = () => {
-    setHearts([...hearts, { id: Math.round(Math.random() * 1000) }]);
+  // const addHeart = () => {
+  //   const oldHearts = [...hearts];
+  //   setHearts([...hearts, { id: Math.round(Math.random() * 1000) }]);
+  //   setTimeout(() => {
+  //     setHearts(oldHearts);
+  //   }, 2000);
+  // };
+
+  const onLikeClick = () => {
+    dispatch(addHeart());
   };
 
   return (
@@ -174,7 +187,7 @@ const App: FunctionComponent = () => {
           <TouchableOpacity onPress={endCall} style={styles.button}>
             <Text style={styles.buttonText}> End Call </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={addHeart} style={styles.button}>
+          <TouchableOpacity onPress={onLikeClick} style={styles.button}>
             <Text style={styles.buttonText}> Like </Text>
           </TouchableOpacity>
         </View>
